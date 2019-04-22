@@ -1,10 +1,13 @@
 import shutil
+import signal
+import subprocess
 import tempfile
 from pathlib import Path
 
 import click
 
 from .downloader import download_package
+from .utils import ignoring
 
 
 @click.group()
@@ -41,8 +44,13 @@ def mirror_like_command(f):
 
 @mirror_like_command
 def mirror(ctx, package):
+    files = list(Path(ctx.obj["download_to"]).iterdir())
+    if files:
+        download_to = ctx.obj["download_to"]
+        ctx.fail(f"Directory {download_to!r} specified by --download-to is not empty.")
+
     ctx.forward(download)
-    ctx.forward(upload)
+    ctx.invoke(upload)
 
 
 @mirror_like_command
@@ -51,8 +59,14 @@ def download(ctx, package):
 
 
 @mirror_like_command
-def upload(ctx, package):
-    raise NotImplementedError
+def upload(ctx):
+    """
+    Run ``twine upload`` with the files stored in `--download-to`.
+    """
+    cmd = ["twine", "upload", "--"]
+    cmd.extend(map(str, Path(ctx.obj["download_to"]).iterdir()))
+    with ignoring(signal.SIGINT):
+        subprocess.check_call(cmd)
 
 
 if __name__ == "__main__":
