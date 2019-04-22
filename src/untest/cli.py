@@ -44,6 +44,12 @@ def mirror_like_command(f):
 
 @mirror_like_command
 def mirror(ctx, package):
+    """
+    Download `package` from test.pypi.org and upload it to pypi.org.
+
+    Use environment variables to pass options to ``twine``.  See
+    ``twine upload --help``.
+    """
     files = list(Path(ctx.obj["download_to"]).iterdir())
     if files:
         download_to = ctx.obj["download_to"]
@@ -55,6 +61,9 @@ def mirror(ctx, package):
 
 @mirror_like_command
 def download(ctx, package):
+    """
+    Download `package` from test.pypi.org.
+    """
     download_package(package, ctx.obj["download_to"])
 
 
@@ -62,6 +71,9 @@ def download(ctx, package):
 def upload(ctx):
     """
     Run ``twine upload`` with the files stored in `--download-to`.
+
+    Use environment variables to pass options to ``twine``.  See
+    ``twine upload --help``.
     """
     cmd = ["twine", "upload", "--"]
     cmd.extend(map(str, Path(ctx.obj["download_to"]).iterdir()))
