@@ -1,3 +1,4 @@
+import shlex
 import shutil
 import signal
 import subprocess
@@ -10,7 +11,7 @@ from .downloader import download_package
 from .utils import ignoring
 
 
-@click.group()
+@click.group(context_settings=dict(help_option_names=["-h", "--help"]))
 @click.option(
     "--download-to",
     help="""
@@ -67,15 +68,23 @@ def download(ctx, package):
     download_package(package, ctx.obj["download_to"])
 
 
-@mirror_like_command
-def upload(ctx):
+@main.command()
+@click.option(
+    "--twine-upload",
+    default="twine upload --",
+    help="""
+    Command to be used to upload files to PyPI.
+    """,
+)
+@click.pass_context
+def upload(ctx, twine_upload):
     """
     Run ``twine upload`` with the files stored in `--download-to`.
 
     Use environment variables to pass options to ``twine``.  See
     ``twine upload --help``.
     """
-    cmd = ["twine", "upload", "--"]
+    cmd = shlex.split(twine_upload)
     cmd.extend(map(str, Path(ctx.obj["download_to"]).iterdir()))
     with ignoring(signal.SIGINT):
         subprocess.check_call(cmd)
