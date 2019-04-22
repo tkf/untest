@@ -1,5 +1,11 @@
-from ..downloader import download_package
+from click.testing import CliRunner
+
+from .. import cli
 
 
-def test_download_package(tmp_path):
-    download_package("requests", str(tmp_path))
+def test_download(tmp_path):
+    runner = CliRunner()
+    result = runner.invoke(
+        cli.main, ["--download-to", str(tmp_path), "download", "requests"]
+    )
+    assert result.exit_code == 0
