@@ -3,10 +3,17 @@ import os
 from logging import getLogger
 from urllib.request import urlretrieve
 
-import packaging
+import packaging.version
 import requests
 
 logger = getLogger(__name__)
+
+
+def choose_version(project, pre):
+    if pre:
+        return sorted(project["releases"], key=packaging.version.parse)[-1]
+    else:
+        return project["info"]["version"]
 
 
 def download_package(package, directory, index_url="https://test.pypi.org", pre=False):
@@ -14,11 +21,7 @@ def download_package(package, directory, index_url="https://test.pypi.org", pre=
     Download `package` from `index_url` in `directory`.
     """
     project = requests.get(f"{index_url}/pypi/{package}/json").json()
-    if pre:
-        version = sorted(project["releases"], key=packaging.version.parse)[-1]
-    else:
-        version = project["info"]["version"]
-    release = project["releases"][version]
+    release = project["releases"][choose_version(project, pre)]
 
     for n, dist in enumerate(release, 1):
         dest = os.path.join(directory, dist["url"].rsplit("/", 1)[-1])
