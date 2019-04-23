@@ -6,11 +6,11 @@ import packaging
 import requests
 
 
-def download_package(package, directory, pypi="https://test.pypi.org", pre=False):
+def download_package(package, directory, index_url="https://test.pypi.org", pre=False):
     """
-    Download `package` from `pypi` in `directory`.
+    Download `package` from `index_url` in `directory`.
     """
-    project = requests.get(f"{pypi}/pypi/{package}/json").json()
+    project = requests.get(f"{index_url}/pypi/{package}/json").json()
     if pre:
         version = sorted(project["releases"], key=packaging.version.parse)[-1]
     else:

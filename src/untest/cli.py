@@ -40,6 +40,13 @@ def main(ctx, download_to):
 
 def download_arguments(f):
     f = click.argument("package")(f)
+    f = click.option("--pre/--no-pre", help="Download pre-release.")(f)
+    f = click.option(
+        "--index-url",
+        default="https://test.pypi.org",
+        help="PyPI server from which package information is retrieved.",
+        show_default=True,
+    )(f)
     return f
 
 
@@ -60,7 +67,7 @@ def upload_arguments(f):
 @download_arguments
 @upload_arguments
 @click.pass_context
-def mirror(ctx, package, twine_upload):
+def mirror(ctx, package, index_url, pre, twine_upload):
     """
     Download `package` from test.pypi.org and upload it to pypi.org.
 
@@ -72,18 +79,18 @@ def mirror(ctx, package, twine_upload):
         download_to = ctx.obj["download_to"]
         ctx.fail(f"Directory {download_to!r} specified by --download-to is not empty.")
 
-    ctx.invoke(download, package=package)
+    ctx.invoke(download, package=package, index_url=index_url, pre=pre)
     ctx.invoke(upload, twine_upload=twine_upload)
 
 
 @main.command()
 @download_arguments
 @click.pass_context
-def download(ctx, package):
+def download(ctx, package, index_url, pre):
     """
     Download `package` from test.pypi.org.
     """
-    download_package(package, ctx.obj["download_to"])
+    download_package(package, ctx.obj["download_to"], index_url=index_url, pre=pre)
 
 
 @main.command()
