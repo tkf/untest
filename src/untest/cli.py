@@ -36,15 +36,27 @@ def main(ctx, download_to):
     ctx.obj["download_to"] = download_to
 
 
-def mirror_like_command(f):
-    f = click.pass_context(f)
+def download_arguments(f):
     f = click.argument("package")(f)
-    f = main.command()(f)
     return f
 
 
-@mirror_like_command
-def mirror(ctx, package):
+def upload_arguments(f):
+    f = click.option(
+        "--twine-upload",
+        default="twine upload --",
+        help="""
+        Command to be used to upload files to PyPI.
+        """,
+    )(f)
+    return f
+
+
+@main.command()
+@download_arguments
+@upload_arguments
+@click.pass_context
+def mirror(ctx, package, twine_upload):
     """
     Download `package` from test.pypi.org and upload it to pypi.org.
 
@@ -56,11 +68,13 @@ def mirror(ctx, package):
         download_to = ctx.obj["download_to"]
         ctx.fail(f"Directory {download_to!r} specified by --download-to is not empty.")
 
-    ctx.forward(download)
-    ctx.invoke(upload)
+    ctx.invoke(download, package=package)
+    ctx.invoke(upload, twine_upload=twine_upload)
 
 
-@mirror_like_command
+@main.command()
+@download_arguments
+@click.pass_context
 def download(ctx, package):
     """
     Download `package` from test.pypi.org.
@@ -69,13 +83,7 @@ def download(ctx, package):
 
 
 @main.command()
-@click.option(
-    "--twine-upload",
-    default="twine upload --",
-    help="""
-    Command to be used to upload files to PyPI.
-    """,
-)
+@upload_arguments
 @click.pass_context
 def upload(ctx, twine_upload):
     """
