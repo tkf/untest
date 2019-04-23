@@ -1,9 +1,12 @@
 import hashlib
 import os
+from logging import getLogger
 from urllib.request import urlretrieve
 
 import packaging
 import requests
+
+logger = getLogger(__name__)
 
 
 def download_package(package, directory, index_url="https://test.pypi.org", pre=False):
@@ -17,8 +20,9 @@ def download_package(package, directory, index_url="https://test.pypi.org", pre=
         version = project["info"]["version"]
     release = project["releases"][version]
 
-    for dist in release:
+    for n, dist in enumerate(release, 1):
         dest = os.path.join(directory, dist["url"].rsplit("/", 1)[-1])
+        logger.info("Downloading (%d/%d) %s", len(release), n, dist["url"])
         urlretrieve(dist["url"], dest)
         check_md5(dist, dest)
 

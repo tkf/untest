@@ -3,15 +3,24 @@ import shutil
 import signal
 import subprocess
 import tempfile
+from logging import getLogger
 from pathlib import Path
 
 import click
+import click_log
 
+from . import __name__ as root_name
 from .downloader import download_package
 from .utils import ignoring, unwrap
 
+root_logger = getLogger(root_name)
+click_log.basic_config(root_logger)
+
+logger = getLogger(__name__)
+
 
 @click.group(context_settings=dict(help_option_names=["-h", "--help"]))
+@click_log.simple_verbosity_option(root_logger, "--log-level", "--verbosity")
 @click.option(
     "--download-to",
     help=unwrap(
@@ -87,7 +96,16 @@ def download(ctx, package, index_url, pre):
     """
     Download `package` from test.pypi.org.
     """
-    download_package(package, ctx.obj["download_to"], index_url=index_url, pre=pre)
+    download_to = ctx.obj["download_to"]
+    logger.debug(
+        "Download package %r (pre=%r) from %r to %r",
+        package,
+        pre,
+        index_url,
+        download_to,
+    )
+
+    download_package(package, download_to, index_url=index_url, pre=pre)
 
 
 @main.command()
@@ -99,6 +117,7 @@ def upload(ctx, twine_upload):
     """
     cmd = shlex.split(twine_upload)
     cmd.extend(map(str, Path(ctx.obj["download_to"]).iterdir()))
+    logger.debug("Run: %r", cmd)
     with ignoring(signal.SIGINT):
         subprocess.check_call(cmd)
 
