@@ -8,16 +8,18 @@ from pathlib import Path
 import click
 
 from .downloader import download_package
-from .utils import ignoring
+from .utils import ignoring, unwrap
 
 
 @click.group(context_settings=dict(help_option_names=["-h", "--help"]))
 @click.option(
     "--download-to",
-    help="""
-    Directory to store downloaded files.  Use a temporary directory if
-    not passed.
-    """,
+    help=unwrap(
+        """
+        Directory to store downloaded files.  Use a temporary
+        directory if not passed.
+        """
+    ),
 )
 @click.pass_context
 def main(ctx, download_to):
@@ -45,9 +47,11 @@ def upload_arguments(f):
     f = click.option(
         "--twine-upload",
         default="twine upload --",
-        help="""
-        Command to be used to upload files to PyPI.
-        """,
+        help=unwrap(
+            """
+            Command to be used to upload files to PyPI.
+            """
+        ),
     )(f)
     return f
 

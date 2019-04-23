@@ -21,3 +21,7 @@ def ignoring(sig):
         yield
     finally:
         signal.signal(sig, s)
+
+
+def unwrap(text):
+    return " ".join(s.strip() for s in text.splitlines())
