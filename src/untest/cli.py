@@ -70,9 +70,6 @@ def upload_arguments(f):
 def mirror(ctx, package, index_url, pre, twine_upload):
     """
     Download `package` from test.pypi.org and upload it to pypi.org.
-
-    Use environment variables to pass options to ``twine``.  See
-    ``twine upload --help``.
     """
     files = list(Path(ctx.obj["download_to"]).iterdir())
     if files:
@@ -99,9 +96,6 @@ def download(ctx, package, index_url, pre):
 def upload(ctx, twine_upload):
     """
     Run ``twine upload`` with the files stored in `--download-to`.
-
-    Use environment variables to pass options to ``twine``.  See
-    ``twine upload --help``.
     """
     cmd = shlex.split(twine_upload)
     cmd.extend(map(str, Path(ctx.obj["download_to"]).iterdir()))
