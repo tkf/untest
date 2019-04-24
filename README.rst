@@ -1,5 +1,5 @@
-untest: a CLI to re-release a package in Test PyPI to PyPI
-==========================================================
+untest: CLI to re-release Python packages
+=========================================
 
 |build-status| |coveralls|
 
