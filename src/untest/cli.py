@@ -10,6 +10,7 @@ import click
 import click_log
 
 from . import __name__ as root_name
+from .click_debug import debuggable
 from .downloader import download_package
 from .utils import ignoring, unwrap
 
@@ -30,6 +31,7 @@ logger = getLogger(__name__)
         """
     ),
 )
+@debuggable.install_options()
 @click.pass_context
 def main(ctx, download_to):
     ctx.ensure_object(dict)
@@ -76,6 +78,7 @@ def upload_arguments(f):
 @download_arguments
 @upload_arguments
 @click.pass_context
+@debuggable.command
 def mirror(ctx, package, index_url, pre, twine_upload):
     """
     Download `package` from test.pypi.org and upload it to pypi.org.
@@ -92,6 +95,7 @@ def mirror(ctx, package, index_url, pre, twine_upload):
 @main.command()
 @download_arguments
 @click.pass_context
+@debuggable.command
 def download(ctx, package, index_url, pre):
     """
     Download `package` from test.pypi.org.
@@ -111,6 +115,7 @@ def download(ctx, package, index_url, pre):
 @main.command()
 @upload_arguments
 @click.pass_context
+@debuggable.command
 def upload(ctx, twine_upload):
     """
     Run ``twine upload`` with the files stored in `--download-to`.
